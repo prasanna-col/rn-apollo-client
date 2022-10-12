@@ -1,26 +1,193 @@
-import * as React from 'react';
-import { Button, View, Text, SafeAreaView } from 'react-native';
-import DrawerHeader from '../../components/header/drawerHeader'
-import { STATUSBAR_HEIGHT } from '../../components/AppConstents'
+import React, { useEffect, useState } from 'react';
+import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Image, FlatList } from 'react-native';
+import VersionCheck from 'react-native-version-check';
+
+import DrawerHeader from '../../components/AppHeader/drawerHeader'
 import AppStatusBar from '../../components/AppStatusBar'
+import AppButton from '../../components/AppButton'
+import AppTextInput from '../../components/AppTextInput'
+import AppContainer from '../../components/AppContainer'
+import { useQuery, useMutation } from '@apollo/client';
+import AppText from '../../components/AppText';
+import { READ_TODOS, CREATE_TODO, REMOVE_TODO, UPDATE_TODO, UPDATE_TODOSTATUS } from './queries'
+import { Colors } from '../../assets/styles';
 
-const TodoScreen = ({ route, navigation }) => {
+import edittask2 from '../../assets/images/edittask2.png';
+import deleteTask from '../../assets/images/deleteTask.png';
+import retry from "../../assets/images/retry.png"
+import { Active_Opacity, App_borderRadius } from '../../components/AppConstants';
+const TaskListScreen = ({ route, navigation }) => {
 
+  const { data, loading, error } = useQuery(READ_TODOS);
+  const [addTodo] = useMutation(CREATE_TODO); //  Here createTodo is user defined
+  const [deleteTodo] = useMutation(REMOVE_TODO); // deleteTodo is user defined, not to be same as in REMOVE_TODO.
+  const [editTodo] = useMutation(UPDATE_TODO);
+  const [updateTodoStaus] = useMutation(UPDATE_TODOSTATUS);
+
+  const [name, setname] = useState("");
+  const [phone, setPhone] = useState("");
+  const [task, setTask] = useState("");
+  const [todoData, setTodoData] = useState([]);
+  const [Loader, setLoader] = useState(true);
+
+
+  const getTask = async () => {
+    setTodoData([...[], ...data?.todos])
+    setLoader(false)
+  }
+
+  console.log("data-->", data)
+
+  const status_view = () => {
+    if (loading) return <Text>loading...</Text>;
+    if (error) return <Text>ERROR</Text>;
+    if (!data) return <Text>Not found</Text>;
+    // if (data) return <Text>Connected</Text>;
+  }
+
+  useEffect(() => {
+    getTask()
+  }, [data]);
+
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', async () => {
+      console.log("refresh")
+      useQuery(READ_TODOS).then((data) => {
+        console.log("then")
+      })
+        .catch((e) => {
+          console.log("e", e)
+        })
+      const usequery_data = useQuery(READ_TODOS);
+      console.log("usequery_data", usequery_data)
+      setTodoData([...[], ...data?.todos])
+      setLoader(false)
+
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
+
+  const onDeleteTask = (taskid) => {
+    deleteTodo({ variables: { id: taskid } });
+  }
+
+  const comp_notComp = (taskid) => {
+    updateTodoStaus({ variables: { id: taskid } })
+  }
+
+  const renderTasks = ({ item, key }) => {
     return (
-        <>
-            <AppStatusBar backgroundColor="#5E8D48" barStyle="light-content" />
-            <SafeAreaView style={{ flex: 1, marginTop: STATUSBAR_HEIGHT }}>
-                <DrawerHeader headerTitle={"Tasks"} />
-                <View style={{ flex: 1, padding: 16 }}>
-                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', }}>
-                        <Text style={{ fontSize: 25, textAlign: 'center', marginBottom: 16 }}> Todo screen</Text>
-                        <Button onPress={() => navigation.navigate('editTask')} title="Edit task" />
-                    </View>
-                </View>
-            </SafeAreaView>
-        </>
+      <View style={[styles.cardStyle, !(item.completed) ? styles.boxShadow : styles.completedShadow, { backgroundColor: !(item.completed) ? Colors.card_bg : Colors.completed2 }]}>
+        <View style={styles.cardview1}>
 
-    );
+          <View style={styles.assignNameView}>
+            {
+              !(item.completed) ? // not completed
+                <AppText h2m semibold >Assigned to: {item?.name}</AppText>
+                :
+                <AppText h2m semibold strike gray italic >Assigned to: {item?.name}</AppText>
+            }
+          </View>
+
+          <View style={styles.iconView}>
+            {
+              !(item.completed) ?
+                <TouchableOpacity
+                  activeOpacity={Active_Opacity} onPress={() => { navigation.navigate("editTask", item) }}>
+                  <Image source={edittask2} style={styles.iconStyle} />
+                </TouchableOpacity>
+                :
+                <TouchableOpacity
+                  activeOpacity={Active_Opacity} onPress={() => { comp_notComp(item.id) }}>
+                  <Image source={retry} style={styles.iconStyle} />
+                </TouchableOpacity>
+            }
+          </View>
+
+          <View style={styles.iconView}>
+            <TouchableOpacity
+              activeOpacity={Active_Opacity} onPress={() => { onDeleteTask(item.id) }}>
+              <Image source={deleteTask} style={styles.iconStyle} />
+            </TouchableOpacity>
+          </View>
+
+        </View>
+        {
+          !(item.completed) ?
+            <AppText h3 mt2 italic underline>Task: {item?.text}</AppText>
+            :
+            <AppText h3 mt2 italic strike gray>Task: {item?.text}</AppText>
+        }
+
+        {
+          !(item.completed) &&
+          <AppButton done onPress={() => { comp_notComp(item.id) }} title={"Done"} />
+        }
+
+      </View>
+    )
+  }
+
+  return (
+    <>
+      <AppStatusBar />
+      <SafeAreaView style={{ flex: 1 }}>
+        <DrawerHeader headerTitle={"Tasks"} rytIcon createTask />
+        {
+          Loader ?
+            <AppText h3 AppBlack >Loading...</AppText> :
+            <AppContainer >
+              <AppText h2m AppBlack bold>Tasks Status</AppText>
+
+              <FlatList
+                style={{ marginBottom: 160 }}
+                data={todoData}
+                keyExtractor={(item, index) => index.toString()}
+                enableEmptySections={true}
+                renderItem={renderTasks}
+              />
+            </AppContainer>
+        }
+      </SafeAreaView>
+    </>
+  );
 }
 
-export default TodoScreen;
+
+
+const styles = StyleSheet.create({
+  boxShadow: {
+    marginBottom: 1,
+    padding: 4,
+    shadowColor: Colors.AppColor,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 3
+  },
+  completedShadow: {
+    marginBottom: 1,
+    padding: 4,
+    shadowColor: Colors.completed,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 3
+  },
+  cardStyle: {
+    backgroundColor: Colors.card_bg,
+    borderRadius: App_borderRadius,
+    paddingHorizontal: 5,
+    marginVertical: 15,
+    marginHorizontal: 8
+  },
+
+  cardview1: { width: "100%", flexDirection: "row", marginTop: 10 },
+  iconView: { width: "10%", alignItems: "center" },
+  iconStyle: { height: 25, width: 25, resizeMode: "contain" },
+  assignNameView: { width: "80%" }
+});
+export default TaskListScreen;

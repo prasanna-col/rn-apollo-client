@@ -1,9 +1,11 @@
 import { StatusBar, StyleSheet, View, SafeAreaView } from 'react-native';
-import { Colors } from "../../assets/colors"
+import { Colors } from "../../assets/styles"
 
 const STATUSBAR_HEIGHT = StatusBar.currentHeight;
 
-const AppStatusBar = () => (
+const AppStatusBar = ({
+
+}) => (
     <View style={styles.statusBar}>
         <SafeAreaView>
             <StatusBar barStyle="light-content" hidden={false} backgroundColor={Colors.statusbarColor} translucent={true} />

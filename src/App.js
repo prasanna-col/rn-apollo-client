@@ -18,13 +18,20 @@ import SecondPage from './pages/SecondPage';
 import ThirdPage from './pages/ThirdPage';
 
 // Todo stack
-import TodoScreen from './pages/todo'
-import EditTodoScreen from './pages/todo/editTodo'
+import TaskListScreen from './pages/todo'
+import EditTaskScreen from './pages/todo/editTask'
+import AddTaskScreen from './pages/todo/addTask'
 
 import { AppContextProvider } from "./context";
+import { ApolloProvider, ApolloClient, InMemoryCache } from "@apollo/client";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
+
+const client = new ApolloClient({
+  uri: "http://localhost:4000/graphql",
+  cache: new InMemoryCache(),
+});
 
 const contextValue = {
 
@@ -126,7 +133,7 @@ function secondScreenStack({ navigation }) {
 function todoScreenStack({ navigation }) {
   return (
     <Stack.Navigator
-      initialRouteName="todo"
+      initialRouteName="taskList"
       screenOptions={{
         headerShown: false // hide stack navigatore header
       }}
@@ -146,16 +153,22 @@ function todoScreenStack({ navigation }) {
     // }}
     >
       <Stack.Screen
-        name="todo"
-        component={TodoScreen}
+        name="taskList"
+        component={TaskListScreen}
         options={{
           title: 'Tasks', //Set Header Title,
         }} />
       <Stack.Screen
         name="editTask"
-        component={EditTodoScreen}
+        component={EditTaskScreen}
         options={{
           title: 'Edit Task', //Set Header Title
+          headerShown: false
+        }} />
+      <Stack.Screen
+        name="addTask"
+        component={AddTaskScreen}
+        options={{
           headerShown: false
         }} />
     </Stack.Navigator>
@@ -164,36 +177,38 @@ function todoScreenStack({ navigation }) {
 
 function App() {
   return (
-    <AppContextProvider value={contextValue}>
-      <NavigationContainer>
-        <Drawer.Navigator
-          drawerContentOptions={{
-            activeTintColor: '#e91e63',
-            itemStyle: { marginVertical: 5 },
-          }}
-        >
-
-          <Drawer.Screen
-            name="TodoPage"
-            options={{ drawerLabel: 'Tasks page Option', headerShown: false }}
-            component={todoScreenStack} />
-
-          <Drawer.Screen
-            name="FirstPage"
-            options={{
-              drawerLabel: 'FirstPage',
-              headerShown: false // Hide the drawer header
+    <ApolloProvider client={client}>
+      <AppContextProvider value={contextValue}>
+        <NavigationContainer>
+          <Drawer.Navigator
+            drawerContentOptions={{
+              activeTintColor: '#e91e63',
+              itemStyle: { marginVertical: 5 },
             }}
-            component={firstScreenStack} />
+          >
 
-          <Drawer.Screen
-            name="SecondPage"
-            options={{ drawerLabel: 'Second page Option', headerShown: false }}
-            component={secondScreenStack} />
+            <Drawer.Screen
+              name="TodoPage"
+              options={{ drawerLabel: 'Tasks page Option', headerShown: false }}
+              component={todoScreenStack} />
 
-        </Drawer.Navigator>
-      </NavigationContainer>
-    </AppContextProvider>
+            <Drawer.Screen
+              name="FirstPage"
+              options={{
+                drawerLabel: 'FirstPage',
+                headerShown: false // Hide the drawer header
+              }}
+              component={firstScreenStack} />
+
+            <Drawer.Screen
+              name="SecondPage"
+              options={{ drawerLabel: 'Second page Option', headerShown: false }}
+              component={secondScreenStack} />
+
+          </Drawer.Navigator>
+        </NavigationContainer>
+      </AppContextProvider>
+    </ApolloProvider>
   );
 }
 

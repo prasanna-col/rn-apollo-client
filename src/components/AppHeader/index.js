@@ -1,7 +1,8 @@
 import * as React from 'react';
-import { View, Text, SafeAreaView, Image, Pressable, StyleSheet } from 'react-native';
+import { View, Text, SafeAreaView, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import Leftarrow from "../../assets/images/Leftarrow.png"
-import { Colors } from '../../assets/colors';
+import { Colors } from '../../assets/styles';
+import { Active_Opacity } from '../AppConstants';
 
 const AppHeader = ({
     route,
@@ -13,9 +14,9 @@ const AppHeader = ({
     return (
         <SafeAreaView>
             <View style={styles.heaederView}>
-                <Pressable style={styles.leftIconView} onPress={onBackPress}>
+                <TouchableOpacity activeOpacity={Active_Opacity} style={styles.leftIconView} onPress={onBackPress}>
                     <Image source={Leftarrow} style={styles.leftIcon} />
-                </Pressable>
+                </TouchableOpacity>
                 <View style={styles.headerTextView}>
                     <Text style={styles.headerText}>{headerTitle}</Text>
                 </View>
