@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { SafeAreaView, StyleSheet, View } from 'react-native';
-import { useQuery, useMutation } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 
 import AppHeader from '../../components/AppHeader'
 import AppStatusBar from '../../components/AppStatusBar'
@@ -8,39 +8,18 @@ import AppButton from '../../components/AppButton'
 import AppTextInput from '../../components/AppTextInput'
 import AppContainer from '../../components/AppContainer'
 import AppText from '../../components/AppText';
-import { READ_TODOS, CREATE_TODO, REMOVE_TODO, UPDATE_TODO, UPDATE_TODOSTATUS } from './queries'
+import { CREATE_TODO } from './queries'
 import { Colors } from '../../assets/styles';
 import { App_borderRadius } from '../../components/AppConstants';
 
 
 const AddTaskScreen = ({ route, navigation }) => {
 
-    const { data, loading, error } = useQuery(READ_TODOS);
     const [addTodo] = useMutation(CREATE_TODO); //  Here createTodo is user defined
-    const [deleteTodo] = useMutation(REMOVE_TODO); // deleteTodo is user defined, not to be same as in REMOVE_TODO.
-    const [editTodo] = useMutation(UPDATE_TODO);
-    const [updateTodoStaus] = useMutation(UPDATE_TODOSTATUS);
 
     const [name, setname] = useState("");
     const [phone, setPhone] = useState("");
     const [task, setTask] = useState("");
-
-    var todoData = data?.todos
-
-    const handleTask = (val, key) => {
-        console.log("todoData", todoData)
-        console.log("val", val, key)
-
-        todoData[key].text = val
-    }
-    // console.log("data", data)
-
-    const status_view = () => {
-        if (loading) return <AppText>loading...</AppText>;
-        if (error) return <AppText>ERROR</AppText>;
-        if (!data) return <AppText>Not found</AppText>;
-        if (data) return <AppText>Connected</AppText>;
-    }
 
     const on_save = async () => {
         var createdata = {
@@ -63,9 +42,7 @@ const AddTaskScreen = ({ route, navigation }) => {
                         navigation.goBack();
                     }} />
                 <AppContainer >
-                    {/* {status_view()} */}
                     <View style={[styles.boxShadow, styles.cardStyle]}>
-
 
                         <AppText h3m AppBlack >Assign to</AppText>
                         <AppTextInput onChangeText={val => setname(val)} placeholder={"Name"} defaultValue={name} />
@@ -104,8 +81,21 @@ const styles = StyleSheet.create({
         marginVertical: 15,
         marginHorizontal: 0
     },
-    cardview1: { width: "100%", flexDirection: "row", marginTop: 10 },
-    iconView: { width: "10%", alignItems: "center" },
-    iconStyle: { height: 25, width: 25, resizeMode: "contain" },
-    assignNameView: { width: "80%" }
+    cardview1: {
+        width: "100%",
+        flexDirection: "row",
+        marginTop: 10
+    },
+    iconView: {
+        width: "10%",
+        alignItems: "center"
+    },
+    iconStyle: {
+        height: 25,
+        width: 25,
+        resizeMode: "contain"
+    },
+    assignNameView: {
+        width: "80%"
+    }
 });

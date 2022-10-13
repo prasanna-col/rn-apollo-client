@@ -49,7 +49,7 @@ mutation UpdateTodo(
 `;
 
 export const UPDATE_TODOSTATUS = gql`
-mutation UpdateTodo($id: String!) {
+mutation UpdateTodoStatus($id: String!) {
   updateTodoStatus(id: $id)
 }
 `;

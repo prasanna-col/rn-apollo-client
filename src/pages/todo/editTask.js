@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { SafeAreaView, StyleSheet, View, Switch } from 'react-native';
-import { useQuery, useMutation } from '@apollo/client';
-
+import { useMutation } from '@apollo/client';
 import AppHeader from '../../components/AppHeader'
 import AppStatusBar from '../../components/AppStatusBar'
 import AppButton from '../../components/AppButton'
 import AppTextInput from '../../components/AppTextInput'
 import AppContainer from '../../components/AppContainer'
 import AppText from '../../components/AppText';
-import { READ_TODOS, CREATE_TODO, REMOVE_TODO, UPDATE_TODO, UPDATE_TODOSTATUS } from './queries'
+import { UPDATE_TODO } from './queries'
 import { Colors } from '../../assets/styles';
 import { App_borderRadius } from '../../components/AppConstants';
 
@@ -16,41 +15,30 @@ import { App_borderRadius } from '../../components/AppConstants';
 const EditTaskScreen = ({ route, navigation }) => {
 
     const taskData = route.params;
-    const { data, loading, error } = useQuery(READ_TODOS);
-    const [addTodo] = useMutation(CREATE_TODO); //  Here createTodo is user defined
-    const [deleteTodo] = useMutation(REMOVE_TODO); // deleteTodo is user defined, not to be same as in REMOVE_TODO.
     const [editTodo] = useMutation(UPDATE_TODO);
-    const [updateTodoStaus] = useMutation(UPDATE_TODOSTATUS);
 
-    const [name, setname] = useState(taskData.name || "");
-    const [phone, setPhone] = useState(taskData.phone || "");
-    const [task, setTask] = useState(taskData.text || "");
-    const [isEnabled, setIsEnabled] = useState(false);
-    const toggleSwitch = () => setIsEnabled(previousState => !previousState);
-    var todoData = data?.todos
+    const [name, setname] = useState(taskData?.name || "");
+    const [phone, setPhone] = useState(taskData?.phone || "");
+    const [task, setTask] = useState(taskData?.text || "");
+    const [date, setDate] = useState(taskData?.date || "12/12/2022");
+    const [time, setTime] = useState(taskData?.time || "02:30 PM");
+    const [ispriority, setIspriority] = useState(taskData?.priority || false);
 
-    const handleTask = (val, key) => {
-        console.log("todoData", todoData)
-        console.log("val", val, key)
-
-        todoData[key].text = val
-    }
-    // console.log("data", data)
-
-    const status_view = () => {
-        if (loading) return <AppText>loading...</AppText>;
-        if (error) return <AppText>ERROR</AppText>;
-        if (!data) return <AppText>Not found</AppText>;
-        if (data) return <AppText>Connected</AppText>;
+    const toggleSwitch = () => {
+        setIspriority(previousState => !previousState);
     }
 
     const on_update = async () => {
-        // var createdata = {
-        //     text: task,
-        //     name: name,
-        //     phone: phone
-        // }
-        // await addTodo({ variables: createdata });
+        var editdata = {
+            id: taskData.id,
+            text: task,
+            name: name,
+            phone: phone,
+            date: date,
+            time: time,
+            priority: ispriority
+        }
+        await editTodo({ variables: editdata });
         await navigation.navigate("taskList")
 
     }
@@ -59,13 +47,8 @@ const EditTaskScreen = ({ route, navigation }) => {
         <>
             <AppStatusBar />
             <SafeAreaView style={{ flex: 1 }}>
-                <AppHeader
-                    headerTitle="Edit Task"
-                    onBackPress={() => {
-                        navigation.goBack();
-                    }} />
+                <AppHeader headerTitle="Edit Task" onBackPress={() => { navigation.goBack(); }} />
                 <AppContainer >
-                    {/* {status_view()} */}
                     <View style={[styles.boxShadow, styles.cardStyle]}>
 
                         <AppText h3m AppBlack >Assign to</AppText>
@@ -80,12 +63,11 @@ const EditTaskScreen = ({ route, navigation }) => {
                         <View style={{ flexDirection: "row", width: "100%" }}>
                             <View style={{ width: "45%", marginRight: 25 }}>
                                 <AppText h3m AppBlack >Date</AppText>
-                                {/* <AppTextInput onChangeText={val => setname(val)} placeholder={"Name"} defaultValue={name} /> */}
-                                <AppText h3m AppBlack2 mt1 bold>12/12/2022</AppText>
+                                <AppText h3m AppBlack2 mt1 bold>{date}</AppText>
                             </View>
                             <View style={{ width: "45%", marginRight: 25 }}>
                                 <AppText h3m AppBlack >Time</AppText>
-                                <AppText h3m AppBlack2 mt1 bold>02:30 PM</AppText>
+                                <AppText h3m AppBlack2 mt1 bold>{time}</AppText>
                             </View>
                         </View>
 
@@ -94,10 +76,10 @@ const EditTaskScreen = ({ route, navigation }) => {
                             <Switch
                                 style={{ marginLeft: 10, transform: [{ scaleX: .9 }, { scaleY: .6 }] }}
                                 trackColor={{ false: "#767577", true: Colors.AppColorLight }}
-                                thumbColor={isEnabled ? Colors.AppColor : "#f4f3f4"}
+                                thumbColor={ispriority ? Colors.AppColor : "#f4f3f4"}
                                 ios_backgroundColor="#3e3e3e"
                                 onValueChange={toggleSwitch}
-                                value={isEnabled}
+                                value={ispriority}
                             />
                         </View>
                     </View>
@@ -105,7 +87,6 @@ const EditTaskScreen = ({ route, navigation }) => {
                 </AppContainer>
             </SafeAreaView>
         </>
-
     );
 }
 
@@ -129,30 +110,21 @@ const styles = StyleSheet.create({
         marginVertical: 15,
         marginHorizontal: 0
     },
-    cardview1: { width: "100%", flexDirection: "row", marginTop: 10 },
-    iconView: { width: "10%", alignItems: "center" },
-    iconStyle: { height: 25, width: 25, resizeMode: "contain" },
-    assignNameView: { width: "80%" }
+    cardview1: {
+        width: "100%",
+        flexDirection: "row",
+        marginTop: 10
+    },
+    iconView: {
+        width: "10%",
+        alignItems: "center"
+    },
+    iconStyle: {
+        height: 25,
+        width: 25,
+        resizeMode: "contain"
+    },
+    assignNameView: {
+        width: "80%"
+    }
 });
-// const EditTaskScreen = ({ route, navigation }) => {
-
-//     return (
-//         <>
-//             <AppStatusBar />
-//             <SafeAreaView style={{ flex: 1 }}>
-//                 <AppHeader
-//                     headerTitle="Edit Task"
-//                     onBackPress={() => {
-//                         navigation.goBack();
-//                     }} />
-//                 <View style={{ padding: 16 }}>
-//                     <View style={{ alignItems: 'center', justifyContent: 'center', }}>
-//                         <Text style={{ fontSize: 25, textAlign: 'center', marginBottom: 16 }}> Edit Todo screen</Text>
-//                     </View>
-//                 </View>
-//             </SafeAreaView>
-//         </>
-//     );
-// }
-
-// export default EditTaskScreen;

@@ -8,7 +8,11 @@ const AppStatusBar = ({
 }) => (
     <View style={styles.statusBar}>
         <SafeAreaView>
-            <StatusBar barStyle="light-content" hidden={false} backgroundColor={Colors.statusbarColor} translucent={true} />
+            <StatusBar
+                barStyle="light-content"
+                hidden={false}
+                backgroundColor={Colors.statusbarColor}
+                translucent={true} />
         </SafeAreaView>
     </View>
 );

@@ -7,11 +7,7 @@ export default function AppText(props) {
         children,
         numberOfLines,
         adjustsFontSizeToFit,
-        onPress,
-        rules,
-        italic,
-        underline,
-        strike
+        onPress
     } = props;
 
     const textStyles = [

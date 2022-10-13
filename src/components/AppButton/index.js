@@ -27,7 +27,10 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         marginTop: 15
     },
-    titleStyle: { color: Colors.white, fontWeight: "bold" },
+    titleStyle: {
+        color: Colors.white,
+        fontWeight: "bold"
+    },
     boxShadow: {
         marginBottom: 1,
         padding: 4,

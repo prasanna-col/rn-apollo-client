@@ -1,6 +1,6 @@
 import React from "react";
-
 import { StyleSheet, View } from 'react-native';
+
 // const AppContainer = (props) => {
 export default function AppContainer(props) {
     const {
@@ -20,7 +20,6 @@ export default function AppContainer(props) {
         </View>
     )
 }
-
 // export default AppContainer;
 
 const styles = StyleSheet.create({

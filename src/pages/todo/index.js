@@ -1,32 +1,27 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Image, FlatList } from 'react-native';
-import VersionCheck from 'react-native-version-check';
+import { View, Text, SafeAreaView, StyleSheet, FlatList } from 'react-native';
+
 
 import DrawerHeader from '../../components/AppHeader/drawerHeader'
 import AppStatusBar from '../../components/AppStatusBar'
 import AppButton from '../../components/AppButton'
-import AppTextInput from '../../components/AppTextInput'
 import AppContainer from '../../components/AppContainer'
 import { useQuery, useMutation } from '@apollo/client';
 import AppText from '../../components/AppText';
-import { READ_TODOS, CREATE_TODO, REMOVE_TODO, UPDATE_TODO, UPDATE_TODOSTATUS } from './queries'
+import { READ_TODOS, REMOVE_TODO, UPDATE_TODOSTATUS } from './queries'
 import { Colors } from '../../assets/styles';
 
-import edittask2 from '../../assets/images/edittask2.png';
-import deleteTask from '../../assets/images/deleteTask.png';
-import retry from "../../assets/images/retry.png"
-import { Active_Opacity, App_borderRadius } from '../../components/AppConstants';
+import { App_borderRadius } from '../../components/AppConstants';
+import AppCardIcons from '../../components/AppCardIcons';
 const TaskListScreen = ({ route, navigation }) => {
 
+  // useQuery -- to get the data from server
+  // useMutation -- to push data or update on server.
+
   const { data, loading, error } = useQuery(READ_TODOS);
-  const [addTodo] = useMutation(CREATE_TODO); //  Here createTodo is user defined
   const [deleteTodo] = useMutation(REMOVE_TODO); // deleteTodo is user defined, not to be same as in REMOVE_TODO.
-  const [editTodo] = useMutation(UPDATE_TODO);
   const [updateTodoStaus] = useMutation(UPDATE_TODOSTATUS);
 
-  const [name, setname] = useState("");
-  const [phone, setPhone] = useState("");
-  const [task, setTask] = useState("");
   const [todoData, setTodoData] = useState([]);
   const [Loader, setLoader] = useState(true);
 
@@ -95,23 +90,14 @@ const TaskListScreen = ({ route, navigation }) => {
           <View style={styles.iconView}>
             {
               !(item.completed) ?
-                <TouchableOpacity
-                  activeOpacity={Active_Opacity} onPress={() => { navigation.navigate("editTask", item) }}>
-                  <Image source={edittask2} style={styles.iconStyle} />
-                </TouchableOpacity>
+                <AppCardIcons edittask2_icon onPress={() => { navigation.navigate("editTask", item) }} />
                 :
-                <TouchableOpacity
-                  activeOpacity={Active_Opacity} onPress={() => { comp_notComp(item.id) }}>
-                  <Image source={retry} style={styles.iconStyle} />
-                </TouchableOpacity>
+                <AppCardIcons retry_icon onPress={() => { comp_notComp(item.id) }} />
             }
           </View>
 
           <View style={styles.iconView}>
-            <TouchableOpacity
-              activeOpacity={Active_Opacity} onPress={() => { onDeleteTask(item.id) }}>
-              <Image source={deleteTask} style={styles.iconStyle} />
-            </TouchableOpacity>
+            <AppCardIcons deleteTask_icon onPress={() => { onDeleteTask(item.id) }} />
           </View>
 
         </View>
